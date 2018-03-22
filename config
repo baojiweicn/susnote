@@ -1,0 +1,15 @@
+[database]
+host = localhost
+user = None
+password = None
+port = None
+database = susnote
+
+[redis]:
+open = False
+host = localhost
+port = 6379
+
+[security]:
+debug = True
+workers = 2
