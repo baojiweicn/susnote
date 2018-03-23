@@ -201,10 +201,13 @@ async def cors_res(request, response):
     if session_interface:
         await session_interface.save(request, response)
 
+from views import note_bp
+
+app.blueprint(note_bp)
+
 @app.route("/")
 async def test(request):
     return text('Hello world!')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8000, debug=DEBUG)
-

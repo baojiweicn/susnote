@@ -7,7 +7,7 @@ import datetime
 
 class BaseModel(Model):
 	id = PrimaryKeyField()
-	create_time = DateTimeField(verbose_name='create_time', default=datetime.datetime.now)
+	create_time = DateTimeField(verbose_name='create_time', constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
 class Article(BaseModel):
 	title = CharField(max_length=128)
@@ -15,7 +15,7 @@ class Article(BaseModel):
 	author_id = IntegerField(default='0')
 	source = CharField(max_length=128)
 
-	class Meta:
+	class Meta:ß
 		db_table = 'article'
 
 class Article_History(BaseModel):
@@ -28,9 +28,9 @@ class Article_History(BaseModel):
 		db_table = 'article_history'
 
 class Author(BaseModel):
-	name = CharField(max_length=128)
 	nickname = CharField(max_length=128)
 	password = CharField(max_length=128)
+	password_salt = CharField(max_length=128)
 	username = CharField(max_length=128)
 
 	class Meta:
