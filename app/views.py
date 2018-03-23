@@ -16,7 +16,7 @@ note_bp = Blueprint('note', url_prefix='note')
 def create_salt(length = 4):
     salt = ''
     chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789'
-    len_chars = len(chars) -1
+    len_chars = len(chars)-1
     random = Random()
     for i in range(length):
         salt += chars[random.randint(0, len_chars)]
@@ -63,5 +63,9 @@ async def register(request):
                 return json({'error':'service error'},status=400)
         else:
             return json({'error':'illegal username'},status=400)
+
+@note_bp.route('')
+async def login(request):
+    pass
 
     return json({'success':'success'},status=200)

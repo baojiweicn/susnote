@@ -15,7 +15,7 @@ class Article(BaseModel):
 	author_id = IntegerField(default='0')
 	source = CharField(max_length=128)
 
-	class Meta:ß
+	class Meta:
 		db_table = 'article'
 
 class Article_History(BaseModel):

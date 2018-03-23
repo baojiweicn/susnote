@@ -5,11 +5,11 @@ password = None
 port = None
 database = susnote
 
-[redis]:
+[redis]
 open = False
 host = localhost
 port = 6379
 
-[security]:
+[security]
 debug = True
 workers = 2
