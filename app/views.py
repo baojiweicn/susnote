@@ -6,9 +6,12 @@ from sanic import  Blueprint, response
 from sanic.response import json, text, html, redirect
 import ujson
 import datetime
+from config import FILE_STATIC_PATH
 
 from hashlib import md5
-from random import Random
+from random import Random, random
+import os
+from os.path import getsize
 
 logger = logging.getLogger('susnote')
 note_bp = Blueprint('note', url_prefix='note')
@@ -26,6 +29,22 @@ def create_md5(pwd,salt):
     md5_obj = md5()
     md5_obj.update((pwd + salt).encode('utf-8'))
     return md5_obj.hexdigest()
+
+async def save_image(details, data):
+    md5_obj = md5()
+    md5_obj.update(('_'.join(details)).encode('utf-8'))
+    path = FILE_STATIC_PATH + md5_obj.hexdigest() + "." +details[-1].split('.')[-1]
+    try:
+        fs = open(path, 'wb')
+        fs.write(data)
+        fs.close()
+        logger.info("save %s image success"% str(details))
+        return path
+    except Exception as e:
+        logger.error("save %s image fail"% str(details))
+        logger.error(e)
+        return None
+
 
 @note_bp.route('/test',methods=['GET'])
 async def test(request):
@@ -99,16 +118,26 @@ async def logout(request):
 
 @note_bp.route('/articles',methods=['GET'])
 async def articles(request):
+    args = request.args
+    limit = args.get('limit',10)
+    start = args.get('start',0)
+    order = args.get('order','desc')
+    article_id = args.get('id',-1)
     articles = []
 
     author_id = request['session']['author_id'] if request['session']['author_id'] else -1
     if author_id <0 :
         return json({'error':'illegal information'}, status=400)
 
-    sql = """select * from article where author_id = '%s'""" % author_id
+    sql = """select * from article where author_id = '%s' """ % author_id
+    if article_id >0:
+        sql = sql + """and article_id=%s """ % article_id
+    sql = sql + """order by id %s limit %s offset %s""" % (order,limit,start)
+
     async with request.app.db.acquire() as cur:
         try:
             records = await cur.fetch(sql)
+            logger.info(sql)
         except Exception as e:
             logger.error(e)
             return json({'error':'illegal information'}, status=400)
@@ -172,3 +201,77 @@ async def update_article(request):
             logger.error(e)
             return json({'error':'service error'}, status=400)
     return json({'success':'success'},status=200)
+
+@note_bp.route('/image',methods=['POST'])
+async def post_image(request):
+    try:
+        form = request.form
+        image = request.files.get("image")
+        image_name = image.name
+        image_type = image.type
+        image_data = image.body
+        article_id = form.get('article_id',-1)
+        title = form.get('title','')
+        related_id = form.get('related_id',-1)
+        author_id = request['session']['author_id']
+    except:
+        return json({'error':'illegal information'},status=400)
+
+    async with request.app.db.acquire() as cur:
+        try:
+            path = await save_image([str(article_id),str(author_id),image_name],image_data)
+            if path:
+                size = getsize(path)
+                sql = "insert into image (path,title,article_id,size,related_id,author_id,type) \
+                values ('%s','%s','%s','%s','%s','%s','%s')"%(path,title,article_id,size,related_id,author_id,image_type)
+                await cur.fetch(sql)
+                logger.info(sql)
+        except Exception as e:
+            logger.error(e)
+            return json({'error':'service error'},status=400)
+    return json({'success':'success'},status=200)
+
+@note_bp.route('/image', methods=['GET'])
+async def get_image(request):
+    images = []
+    try:
+        args = request.args
+        image_id = args.get("id",-1)
+        image_title = args.get("title","")
+        article_id = args.get("article_id",-1)
+        author_id = request['session']['author_id']
+        limit = args.get('limit',10)
+        start = args.get('start',0)
+        order = args.get('order','desc')
+    except Exception as e:
+        return json({'error':'illegal information'},status=400)
+
+    async with request.app.db.acquire() as cur:
+        sql = """select * from image where author_id=%s """%author_id
+        if int(image_id) >0 :
+            sql = sql + """and id=%s """%image_id
+        if image_title !="":
+            sql = sql + """and image_title=%s """%image_title
+        if int(article_id) >0:
+            sql = sql + """and article_id=%s """%article_id
+        sql =  sql + """order by id %s limit %s offset %s""" % (order,limit,start)
+        print(sql)
+        try:
+            records = await cur.fetch(sql)
+            if records:
+                for record in records:
+                    images.append({
+                    "id":       record['id'],
+                    "title":    record['title'],
+                    "path":  record['path'],
+                    "article_id":   record['article_id'],
+                    "size": record["size"],
+                    "type": record["type"],
+                    "related_id": record["related_id"]
+                    })
+            logger.info(sql)
+        except Exception as e:
+            logger.error(e)
+            return json({'error':'illegal information'}, status=400)
+
+        return json(images)

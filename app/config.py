@@ -37,3 +37,4 @@ REDIS_CONFIG = {
 DEBUG = config_get('security','debug')
 WORKERS = config_get('security', 'workers')
 TEMPLATE_PATH = 'template/html'
+FILE_STATIC_PATH = 'template/images'

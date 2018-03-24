@@ -42,6 +42,8 @@ class Image(BaseModel):
 	article_id = IntegerField(default='0')
 	size = CharField(max_length=128)
 	related_id = IntegerField(default='0')
+	author_id = IntegerField(default='0')
+	type = CharField(max_length=128)
 
 	class Meta:
 		db_table = 'image'
