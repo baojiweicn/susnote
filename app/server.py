@@ -145,7 +145,7 @@ class Client:
 
 from sanic import Sanic
 from sanic.response import json, text
-from config import DEBUG, WORKERS, DB_CONFIG, REDIS_CONFIG, TEMPLATE_PATH
+from config import DEBUG, WORKERS, DB_CONFIG, REDIS_CONFIG, TEMPLATE_PATH, FILE_STATIC_PATH
 from jinja2 import Environment, FileSystemLoader
 import asyncio_redis
 
@@ -201,9 +201,11 @@ async def cors_res(request, response):
     if session_interface:
         await session_interface.save(request, response)
 
-from views import note_bp
-
-app.blueprint(note_bp)
+from views import article_bp, image_bp, user_bp
+app.config.FILE_STATIC_PATH = FILE_STATIC_PATH
+app.blueprint(article_bp)
+app.blueprint(image_bp)
+app.blueprint(user_bp)
 
 @app.route("/")
 async def test(request):

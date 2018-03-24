@@ -2,9 +2,9 @@
 # encoding: utf-8
 
 from configparser import ConfigParser
-
+import os
 config_parser = ConfigParser()
-config_parser.read("../config")
+config_parser.read(os.path.dirname(os.getcwd()) + "/config")
 
 def config_get(section, option):
     detail = config_parser.get(section, option)
@@ -37,4 +37,4 @@ REDIS_CONFIG = {
 DEBUG = config_get('security','debug')
 WORKERS = config_get('security', 'workers')
 TEMPLATE_PATH = 'template/html'
-FILE_STATIC_PATH = 'template/images'
+FILE_STATIC_PATH = '../images/'
