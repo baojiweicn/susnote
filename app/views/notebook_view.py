@@ -7,28 +7,27 @@ from sanic.response import json, text, html, redirect
 import ujson
 import datetime
 
-logger = logging.getLogger('article')
-article_bp = Blueprint('article', url_prefix='article')
+logger = logging.getLogger('notebook')
+notebook_bp = Blueprint('notebook', url_prefix='notebook')
 
-@article_bp.route('/get',methods=['GET'])
-async def articles(request):
+@notebook_bp.route('/get',methods=['GET'])
+async def notebooks(request):
     args = request.args
     limit = args.get('limit',10)
     start = args.get('start',0)
     order = args.get('order','desc')
-    article_id = int(args.get('id',-1))
-    notebook_id = int(args.get('notebook_id',-1))
-    articles = []
+    notebook_id = args.get('id',-1)
+
+    notebooks = []
 
     author_id = request['session']['author_id'] if request['session']['author_id'] else -1
+
     if author_id <0 :
         return json({'error':'illegal information'}, status=400)
 
-    sql = """select * from article where author_id = '%s' """ % author_id
-    if article_id >0:
-        sql = sql + """and article_id=%s """ % article_id
+    sql = """select * from notebook where author_id = '%s' """ % author_id
     if notebook_id >0:
-        sql = sql + """and notebook_id=%s """ % notebook_id
+        sql = sql + """and article_id=%s """ % article_id
     sql = sql + """order by id %s limit %s offset %s""" % (order,limit,start)
 
     async with request.app.db.acquire() as cur:
@@ -41,18 +40,14 @@ async def articles(request):
 
     if records:
         for record in records:
-            articles.append({
+            notebooks.append({
             "id":       record['id'],
-            "title":    record['title'],
-            "content":  record['content'],
-            "source":   record['source'],
-            "notebook_id": record['notebook_id'],
-            "author_name": request["session"]["author_name"],
+            "name":    record['name'],
             })
-    return json(articles)
+    return json(notebooks)
 
-@article_bp.route('/post',methods=['POST'])
-async def add_article(request):
+@notebook_bp.route('/post',methods=['POST'])
+async def add_notebooks(request):
     data = {}
     try:
         data = ujson.loads(request.body)
@@ -63,8 +58,8 @@ async def add_article(request):
     if author_id <0:
         return json({'error':'illegal information'}, status=400)
 
-    sql = """insert into article (title,content,author_id,source,notebook_id) values ('%s','%s','%s','%s','%s')""" \
-    %(data.get('title'), data.get('content'), author_id, data.get('source'), data.get('notebook_id'))
+    sql = """insert into notebook (name,author_id) values ('%s','%s')""" \
+    %(data.get('name'), author_id)
     async with request.app.db.acquire() as cur:
         try:
             await cur.fetch(sql)
@@ -74,8 +69,8 @@ async def add_article(request):
             return json({'error':'service error'}, status=400)
     return json({'success':'success'},status=200)
 
-@article_bp.route('/put',methods=['PUT'])
-async def update_article(request):
+@notebook_bp.route('/put',methods=['PUT'])
+async def update_notebook(request):
     data = {}
     try:
         data = ujson.loads(request.body)
@@ -85,12 +80,12 @@ async def update_article(request):
     author_id = request['session']['author_id'] if request['session']['author_id'] else -1
     if author_id <0:
         return json({'error':'illegal information'}, status=400)
-    article_id = data.get("id") if data.get("id") else -1
+    notebook_id = data.get("id") if data.get("id") else -1
     if article_id<0:
         return json({'error':'illegal information'},status=400)
 
-    sql = """update article set title='%s', content='%s', author_id='%s',source='%s',notebook_id='%s' where id=%s""" \
-    %(data.get('title'),data.get('content'),author_id,data.get('source'),data.get('notebook_id'),article_id)
+    sql = """update notebook set name='%s', author_id='%s' where id=%s""" \
+    %(data.get('name'),author_id,notebook_id)
 
     async with request.app.db.acquire() as cur:
         try:
@@ -101,8 +96,8 @@ async def update_article(request):
             return json({'error':'service error'}, status=400)
     return json({'success':'success'},status=200)
 
-@article_bp.route('/delete',methods=['DELETE'])
-async def delete_article(request):
+@notebook_bp.route('/delete',methods=['DELETE'])
+async def delete_notebook(request):
     data = {}
     try:
         data = ujson.loads(request.body)
@@ -112,11 +107,11 @@ async def delete_article(request):
     author_id = request['session']['author_id'] if request['session']['author_id'] else -1
     if author_id <0:
         return json({'error':'illegal information'}, status=400)
-    article_id = data.get("id") if data.get("id") else -1
+    notebook_id = data.get("id") if data.get("id") else -1
     if article_id<0:
         return json({'error':'illegal information'},status=400)
 
-    sql = """delete from article where author_id='%s' and id=%s"""%(author_id,article_id)
+    sql = """delete from notebook where author_id='%s' and id=%s"""%(author_id,notebook_id)
 
     async with request.app.db.acquire() as cur:
         try:

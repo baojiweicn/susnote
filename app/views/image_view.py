@@ -30,7 +30,7 @@ async def save_image(details, data):
         logger.error(e)
         return None
 
-@image_bp.route('/',methods=['POST'])
+@image_bp.route('/post',methods=['POST'])
 async def post_image(request):
     try:
         form = request.form
@@ -59,7 +59,7 @@ async def post_image(request):
             return json({'error':'service error'},status=400)
     return json({'success':'success'},status=200)
 
-@image_bp.route('/', methods=['GET'])
+@image_bp.route('/get', methods=['GET'])
 async def get_image(request):
     images = []
     try:

@@ -84,6 +84,7 @@ async def login(request):
             password = records[0]['password']
             if password == create_md5(data.get('password'),salt):
                 request['session']['author_id'] = records[0]['id']
+                request['session']['author_name'] = records[0]['nickname']
                 return json({'success':'success'},status=200)
     return json({'error':'illegal information'},status=400)
 

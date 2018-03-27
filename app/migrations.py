@@ -64,6 +64,11 @@ class MigrationModel(object):
         print('Migrating==> [%s] drop_index: %s' % (self._name, col))
         return self.migrator.drop_index(self._name, col)
 
+class Notebook_Migration(MigrationModel):
+    _model = Notebook
+    _db = db
+    _migrator = migrator
+
 class Article_Migration(MigrationModel):
 	_model = Article
 	_db = db
@@ -100,6 +105,7 @@ class RSS_Category_Migration(MigrationModel):
 	_migrator = migrator
 
 def migrations():
+    notebook_Migration = Notebook_Migration()
     article_Migration = Article_Migration()
     article_History_Migration = Article_History_Migration()
     author_Migration = Author_Migration()
@@ -119,4 +125,3 @@ def migrations():
 
 if __name__ == '__main__':
     migrations()
-

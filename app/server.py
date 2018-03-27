@@ -149,7 +149,7 @@ from config import DEBUG, WORKERS, DB_CONFIG, REDIS_CONFIG, TEMPLATE_PATH, FILE_
 from jinja2 import Environment, FileSystemLoader
 import asyncio_redis
 
-from sanic_session import RedisSessionInterface
+from sanic_session import RedisSessionInterface, InMemorySessionInterface
 
 logger_main = logging.getLogger('susnote')
 app = Sanic(__name__)
@@ -167,17 +167,38 @@ class Redis:
             self._pool = await asyncio_redis.Pool.create(host=REDIS_CONFIG['host'], port=REDIS_CONFIG['port'], poolsize=10)
         return self._pool
 
+class MemCache(dict):
+    def __init__(self):
+        super(MemCache,self).__init__()
+
+    async def set(self,key,value):
+        self.update({key:value})
+
+    async def get(self,key):
+        return self[key]
+
+    async def delete(self,key):
+        try:
+            del self[key]
+        except Exception as e:
+            return None
+
 if REDIS_CONFIG['open']:
     redis = Redis()
     session_interface = RedisSessionInterface(redis.get_redis_pool)
 else:
-    session_interface = None
+    memCache = MemCache()
+    session_interface = InMemorySessionInterface()
 
 @app.listener('before_server_start')
 async def before_srver_start(app, loop):
     app.db = await BaseConnection(loop=loop).init(DB_CONFIG=DB_CONFIG)
     app.client =  Client(loop=loop)
     app.env = Environment(loader=FileSystemLoader(TEMPLATE_PATH), enable_async=True)
+    if REDIS_CONFIG['open']:
+        app.cache = await redis.get_redis_pool()
+    else:
+        app.cache = memCache
 
 @app.listener('before_server_stop')
 async def before_server_stop(app, loop):
@@ -201,11 +222,13 @@ async def cors_res(request, response):
     if session_interface:
         await session_interface.save(request, response)
 
-from views import article_bp, image_bp, user_bp
+from views import article_bp, image_bp, user_bp, notebook_bp
 app.config.FILE_STATIC_PATH = FILE_STATIC_PATH
+app.static('/','../frontend/')
 app.blueprint(article_bp)
 app.blueprint(image_bp)
 app.blueprint(user_bp)
+app.blueprint(notebook_bp)
 
 @app.route("/")
 async def test(request):

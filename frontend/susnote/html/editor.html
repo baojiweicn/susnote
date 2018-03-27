@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head lang="zh">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title></title>
+    <script src="../../tui.editor/lib/jquery/dist/jquery.js"></script>
+    <script src="../../tui.editor/lib/markdown-it/dist/markdown-it.js"></script>
+    <script src="../../tui.editor/lib/to-mark/dist/to-mark.js"></script>
+    <script src="../../tui.editor/lib/tui-code-snippet/dist/tui-code-snippet.js"></script>
+    <script src="../../tui.editor/lib/tui-color-picker/dist/tui-color-picker.js"></script>
+    <script src="../../tui.editor/lib/codemirror/lib/codemirror.js"></script>
+    <script src="../../tui.editor/lib/highlightjs/highlight.pack.js"></script>
+    <script src="../../tui.editor/lib/squire-rte/build/squire-raw.js"></script>
+    <link rel="stylesheet" href="../../tui.editor/lib/codemirror/lib/codemirror.css">
+    <link rel="stylesheet" href="../../tui.editor/lib/highlightjs/styles/github.css">
+    <link rel="stylesheet" href="./additional.css">
+    <!-- Bootstrap CSS-->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css"
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+  <body>
+
+    <!--use tui.editor: https://github.com/nhnent/tui.editor -->
+    <script src="../../tui.editor/lib/plantuml-encoder/dist/plantuml-encoder.js"></script>
+    <script src="../../tui.editor/lib/raphael/raphael.js"></script>
+    <script src="../../tui.editor/lib/tui-chart/dist/tui-chart.js"></script>
+    <script src="../../tui.editor/dist/tui-editor-Editor-all.js"></script>
+    <link rel="stylesheet" href="../../tui.editor/dist/tui-editor.css">
+    <link rel="stylesheet" href="../../tui.editor/dist/tui-editor-contents.css">
+    <link rel="stylesheet" href="../../tui.editor/lib/tui-color-picker/dist/tui-color-picker.css">
+    <link rel="stylesheet" href="../../tui.editor/lib/tui-chart/dist/tui-chart.css">
+
+    <!--notebook选择器-->
+    <div class="x-selector" id="x-selector" hidden>
+      <div class="selector-header" id="selector-header"></div>
+      <div class="btn-group-vertical" id="x-selector-list" style="width:100%">
+
+      </div>
+    </div>
+
+    <div class="row" style="height:100%;width:100%">
+
+      <!--导航面板-->
+      <div class="nav-bar" id="nav-bar">
+        <div class="btn-group-vertical">
+          <div style="height:40px"></div>
+          <div class="nav-bnt" id="search-button"><img src="../images/ic_search.svg" type="image/svg+xml"></img></div>
+          <div class="nav-bnt" id="add-button"><img src="../images/ic_add.svg" type="image/svg+xml"></img></div>
+          <div class="nav-bnt" id="article-button"><img src="../images/ic_description.svg" type="image/svg+xml"></img></div>
+        </div>
+        <div style="position:absolute;bottom:20px">
+          <div class="btn-group-vertical" >
+            <div class="nav-bnt" id="notebook-button"><img src="../images/ic_book.svg" type="image/svg+xml"></img></div>
+            <div class="nav-bnt" id="tags-button"><img src="../images/ic_local_offer.svg" type="image/svg+xml"></img></div>
+            <div class="nav-bnt" id="user-button"><img src="../images/ic_account_circle.svg" type="image/svg+xml"></img></div>
+          </div>
+        </div>
+      </div>
+
+      <!--文章列表-->
+      <div class="col-2 article-list" id="article-list">
+        <div class="head-block" id="head-block"></div>
+           <ul class="list-group" id="list-group">
+           </ul>
+      </div>
+
+      <!--编辑器-->
+      <div class="col editor-area" id="editor-area">
+        <div id="title-controller">
+          <input type="text" class="editor-title" id="editor-title" placeholder="标题">
+          <div class="editor-expend" id="editor-expend" data-expended="false"></div>
+          <div class="editor-title-cancle-button" id="editor-title-cancle-button">取消</div>
+          <div class="editor-title-submit-button" id="editor-title-submit-button">保存</div>
+        </div>
+        <div id="article-info" class="article-info"></div>
+        <div style="height:90%;width:100%">
+          <div id="editSection"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <script class="code-js">
+      var editor = new tui.Editor({
+        el: document.querySelector('#editSection'),
+        previewStyle: 'vertical',
+        initialEditType: 'wysiwyg',
+        height: "100%",
+        useCommandShortcut: true,
+        language: "zh_CN",
+        exts: ['scrollSync', 'colorSyntax', 'uml', 'chart', 'mark', 'table', 'taskCounter','expend']
+      });
+    </script>
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="../js/editor.js"></script>
+  </body>
+</html>

@@ -9,10 +9,18 @@ class BaseModel(Model):
 	id = PrimaryKeyField()
 	create_time = DateTimeField(verbose_name='create_time', constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
+class Notebook(BaseModel):
+	name = CharField(max_length=128)
+	author_id = IntegerField(default='0')
+
+	class Meta:
+		db_table = 'notebook'
+
 class Article(BaseModel):
 	title = CharField(max_length=128)
 	content = TextField(verbose_name='content')
 	author_id = IntegerField(default='0')
+	notebook_id = IntegerField(default='0')
 	source = CharField(max_length=128)
 
 	class Meta:
