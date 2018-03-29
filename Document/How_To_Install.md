@@ -20,10 +20,10 @@ After all these work:
 如果已经有这样的环境:
     pip3 install -r requirements.txt
 
-安装完环境之后，需要初始化数据库(postgres):
+安装完环境之后，需要初始化数据库(postgres):<br>
 [Mac系统](https://www.postgresql.org/download/macosx/) <br>
 [Linux系统](https://www.postgresql.org/download/linux/ubuntu/) <br>
-[Windows系统](https://www.postgresql.org/download/macosx/) <br>
+[Windowsß系统](https://www.postgresql.org/download/macosx/) <br>
 
 安装完成后，进入到postgres-cli:
     CREATE DATABASE susnote;
