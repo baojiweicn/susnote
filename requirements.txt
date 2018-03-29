@@ -11,6 +11,8 @@ idna-ssl==1.0.1
 Jinja2==2.10
 MarkupSafe==1.0
 multidict==4.1.0
+peewee==3.2.0
+psycopg2==2.7.4
 sanic==0.7.0
 sanic-session==0.1.5
 ujson==1.35
