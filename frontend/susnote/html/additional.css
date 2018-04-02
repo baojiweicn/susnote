@@ -173,3 +173,24 @@ input:focus {
   height:60px;
   width:100%;
 }
+
+.logo-box {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  height: 53px;
+  margin:18px 20px;
+  float: left;
+  border: 1px solid #e3e3e3;
+  border-radius: 5px;
+  line-height: 36px;
+  overflow: hidden;
+  padding: 6px 15px;
+  text-align: center;
+}
+
+.logo-box img{
+    display: inline;
+    max-width: 100%;
+    max-height: 100%;
+}
