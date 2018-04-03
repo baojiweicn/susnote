@@ -34,7 +34,7 @@ Ajax.prototype.send = function(method,url,callback,data){
     }
     xhr.open(method,url+data_send,true);
     xhr.send(null);
-  }else if(method === 'post'){//如果是post，需要在头中添加content-type说明
+  }else if(method === 'post' || method === 'put'){//如果是post，需要在头中添加content-type说明
       xhr.open(method,url,true);
       xhr.setRequestHeader('Content-Type','application/json');
       xhr.send(JSON.stringify(data));//发送的数据需要转化成JSON格式
@@ -65,9 +65,13 @@ var x_selector_list = document.getElementById("x-selector-list");
 var selector_item = null;
 
 //数据
-var notebooks = []
-var articles = []
-var sorted_articles = {}
+var notebooks = [];
+var articles = [];
+var sorted_articles = {};
+var current_notebook_id = -1;
+var current_article = undefined;
+var current_origin_article = undefined;
+var origin_title = "";
 
 //全屏功能
 expend_editor.onclick = function(){
@@ -173,7 +177,6 @@ function initial_data(){
   console.log("Ready!")
   moke_login();
   get_article();
-  get_notebooks();
 };
 
 //往控件中添加数据
@@ -200,11 +203,14 @@ function fulfill_notebooks(){
   }
   children = x_selector_list.children;
   // 注意这里需要使用闭包处理!!!
+  //设置每个notebook按钮的click事件
   for(i=0;i<children.length;i++){
     children[i].onclick = (function close(j){
       return function() {
+        current_notebook_id = children[j].dataset["id"];
         fulfill_articles(children[j].dataset);
         button_current(article_button);
+        article_list.hidden = false;
         x_selector.hidden = true;
       }
     })(i);
@@ -239,15 +245,23 @@ function fulfill_articles(dataset){
       t.dataset.id = res[i]["id"];
       t.dataset.type = "article";
       list_group.appendChild(t);
+      //绑定点击文章按钮
       t.onclick = (function close(j){
         return function() {
-          article = get_article_details(j.dataset.id);
-          editor_title.value = article["title"];
-          editor_title.dataset.id = article["id"];
-          editor.setMarkdown(article["content"]);
-          article_current(j);
+          set_current_article(j);
         }
       })(t);
+    };
+    if(current_article == null)
+    {
+      set_current_article(list_group.children[0]);
+    }
+    else {
+      article_items = Array.prototype.slice.call(list_group.children);
+      var m = article_items.filter(item=>item.dataset.id==current_article.dataset.id);
+      if(m.length>0){
+        set_current_article(m[0]);
+      }
     }
   }
 };
@@ -258,12 +272,32 @@ function get_article_details(article_id){
       return articles[i];
     }
   }
-  return {};
+  return {
+    "id":undefined,
+    "title":"",
+    "content":"",
+    "source":"",
+    "notebook_id":current_notebook_id,
+  };
 };
 
 //为文章的列表添加onclick事件
 //设置该文章为当前选中文章
-function article_current(article_item){
+function set_current_article(article_item){
+  if(current_article!=null && current_article.dataset.type=="new_article")
+  {
+    post_article();
+  }
+  else if(current_article!=null && (editor.getMarkdown() != current_origin_article || editor_title.value != origin_title))
+  {
+    console.log('put');
+    update_article();
+  };
+  article = get_article_details(article_item.dataset.id);
+  editor_title.value = article["title"];
+  editor_title.dataset.id = article["id"];
+  editor_title.dataset.type = "article";
+  editor.setMarkdown(article["content"]);
   article_items = Array.prototype.slice.call(list_group.children);
   var tmp_articles_items = article_items.slice();
   tmp_articles_items.splice(tmp_articles_items.indexOf(article_item),1);
@@ -273,6 +307,9 @@ function article_current(article_item){
         tmp_articles_items[i].classList.remove("list-group-item-current");
       }
   }
+  current_article = article_item;
+  current_origin_article = editor.getMarkdown();
+  origin_title = editor_title.value;
 };
 
 
@@ -299,6 +336,8 @@ function get_notebooks(){
     callback:function(res){
       notebooks = JSON.parse(res);
       fulfill_notebooks();
+      fulfill_articles(notebooks[0]);
+      current_notebook_id = notebooks[0]["id"];
     },
     data: {}
   });
@@ -309,6 +348,7 @@ function get_article(notebook_id){
   url_get = '/article/get';
   if(notebook_id>0){
     url_get = url_get + '?notebook_id=' +notebook_id;
+    current_notebook_id = notebook_id;
   }
   var ajax = new Ajax({
     method:'get',
@@ -316,6 +356,7 @@ function get_article(notebook_id){
     callback:function(res){
       articles = JSON.parse(res);
       sort_article();
+      get_notebooks();
     },
     data: {}
   });
@@ -337,18 +378,103 @@ function clear_notebook_list(){
   };
 };
 
-function moke_post_article(){
-  var ajax = new Ajax({
-    method:'post',
-    url:'/article/post',
-    callback:function(res){
-      console.log(res);
-    },
-    data: {
-	    "title":"test",
-	    "content":"Hello World!",
-      "notebook_id":"1",
-    }
-  });
-  ajax.send();
+function get_title(){
+  title = document.getElementById("editor-title")
+  return String(title.value);
+};
+function get_content(){
+  content = editor.getMarkdown();
+  return String(content);
+};
+function get_notebook_id(){
+  return String(current_notebook_id);
+};
+function get_article_id(){
+  return String(editor_title.dataset.id);
+};
+
+function update_article(){
+  if(get_article_id()!="undefined") {
+    var ajax = new Ajax({
+      method:'put',
+      url: '/article/put',
+      callback:function(res){
+        get_article();
+        console.log(res);
+      },
+      data: {
+        "id":get_article_id(),
+        "content":get_content(),
+        "title":get_title(),
+        "notebook_id":get_notebook_id(),
+      }
+    });
+    ajax.send();
+  }
+  else{
+    console.log("error:no article id");
+  }
+};
+
+function post_article(){
+  if (get_article_id()=="undefined"){
+    var ajax = new Ajax({
+      method:'post',
+      url:'/article/post',
+      callback:function(res){
+        console.log(res);
+        get_article();
+        editor_title.dataset.type="article";
+        current_article.dataset.type="article";
+      },
+      data: {
+  	    "title":get_title(),
+  	    "content":get_content(),
+        "notebook_id":get_notebook_id(),
+      }
+    });
+    ajax.send();
+  }
+  else{
+    console.log("error:already have article id");
+  }
+};
+
+add_button.onclick = function(){
+  if(x_selector.hidden==false){
+    new_notebook();
+  }
+  else{
+    new_article();
+  };
+};
+
+function new_notebook(){
+  var t = document.createElement('dt');
+  t.className = "selector-item";
+  t.id = "selector-item";
+  t.innerHTML = '<div><input><div class="selector-item-name">'
+                +"name"+'</div>'+'</div>';
+  x_selector_list.appendChild(t);
+};
+
+editor_title.oninput = function(){
+  current_article.innerText = editor_title.value;
+};
+
+function new_article(){
+  if(editor_title.dataset.type != "new_article"){
+    set_current_article(current_article);
+  };
+
+  var t = document.createElement('li');
+  t.className = 'list-group-item';
+  t.id = 'list-group-item';
+  t.dataset.type = "new_article";
+  list_group.appendChild(t);
+
+  editor_title.value = "";
+  editor_title.dataset.id = undefined;
+  editor_title.dataset.type = "new_article";
+  set_current_article(t);
 };

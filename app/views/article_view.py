@@ -6,6 +6,7 @@ from sanic import  Blueprint, response
 from sanic.response import json, text, html, redirect
 import ujson
 import datetime
+from html import escape, unescape
 
 logger = logging.getLogger('article')
 article_bp = Blueprint('article', url_prefix='article')
@@ -43,11 +44,11 @@ async def articles(request):
         for record in records:
             articles.append({
             "id":       record['id'],
-            "title":    record['title'],
-            "content":  record['content'],
-            "source":   record['source'],
+            "title":    unescape(record['title']),
+            "content":  unescape(record['content']),
+            "source":   unescape(record['source']),
             "notebook_id": record['notebook_id'],
-            "author_name": request["session"]["author_name"],
+            "author_name": unescape(request["session"]["author_name"]),
             })
     return json(articles)
 
@@ -62,9 +63,9 @@ async def add_article(request):
     author_id = request['session']['author_id'] if request['session']['author_id'] else -1
     if author_id <0:
         return json({'error':'illegal information'}, status=400)
-
+    print(data)
     sql = """insert into article (title,content,author_id,source,notebook_id) values ('%s','%s','%s','%s','%s')""" \
-    %(data.get('title'), data.get('content'), author_id, data.get('source'), data.get('notebook_id'))
+    %(escape(data.get('title','')), escape(data.get('content','')), author_id, escape(data.get('source','')), data.get('notebook_id'))
     async with request.app.db.acquire() as cur:
         try:
             await cur.fetch(sql)
@@ -79,18 +80,18 @@ async def update_article(request):
     data = {}
     try:
         data = ujson.loads(request.body)
-    except:
+    except Exceotion as e:
         return json({'error':'illegal information'},status=400)
 
     author_id = request['session']['author_id'] if request['session']['author_id'] else -1
     if author_id <0:
         return json({'error':'illegal information'}, status=400)
     article_id = data.get("id") if data.get("id") else -1
-    if article_id<0:
+    if int(article_id)<0:
         return json({'error':'illegal information'},status=400)
 
     sql = """update article set title='%s', content='%s', author_id='%s',source='%s',notebook_id='%s' where id=%s""" \
-    %(data.get('title'),data.get('content'),author_id,data.get('source'),data.get('notebook_id'),article_id)
+    %(escape(data.get('title','')),escape(data.get('content','')),author_id,escape(data.get('source','')),data.get('notebook_id'),article_id)
 
     async with request.app.db.acquire() as cur:
         try:
