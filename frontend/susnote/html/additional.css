@@ -98,10 +98,12 @@ input:focus {
 }
 
 .article-list {
+  height: 100%;
   padding: 0px !important;
   background-color: #f4f4f4;
   border-right: 1px solid #ccc;
   min-width: 250px !important;
+  overflow-y: auto;
 }
 
 .head-block {
@@ -144,6 +146,7 @@ input:focus {
   background-color: #f4f4f4;
   z-index: 9990;
   border-right: 1px solid #ccc;
+  overflow-y: auto;
 }
 
 .selector-item {
@@ -167,6 +170,10 @@ input:focus {
   font-size: 10px;
   font-family: Tahoma,Helvetica,Arial,"\5b8b\4f53",sans-serif ;
   padding-left: 5px;
+}
+.selector-item .selector_input {
+  font-size: 18px;
+  font-family: Tahoma,Helvetica,Arial,"\5b8b\4f53",sans-serif;
 }
 .selector-header{
   text-align: center;

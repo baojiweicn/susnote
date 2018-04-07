@@ -87,12 +87,12 @@ expend_editor.onclick = function(){
 };
 
 //控制输入框提交按钮显示消失
-title_controller.onmouseover = function(){
-  hide_submit();
-};
-title_controller.onmouseout = function(){
-  show_submit();
-};
+//title_controller.onmouseover = function(){
+//  hide_submit();
+//};
+//title_controller.onmouseout = function(){
+//  show_submit();
+//};
 
 function show_submit(){
   document.getElementById("editor-expend").hidden = true;
@@ -204,17 +204,19 @@ function fulfill_notebooks(){
   children = x_selector_list.children;
   // 注意这里需要使用闭包处理!!!
   //设置每个notebook按钮的click事件
-  for(i=0;i<children.length;i++){
-    children[i].onclick = (function close(j){
-      return function() {
-        current_notebook_id = children[j].dataset["id"];
-        fulfill_articles(children[j].dataset);
-        button_current(article_button);
-        article_list.hidden = false;
-        x_selector.hidden = true;
-      }
-    })(i);
-  }
+  if(children){
+    for(i=0;i<children.length;i++){
+      children[i].onclick = (function close(j){
+        return function() {
+          current_notebook_id = children[j].dataset["id"];
+          fulfill_articles(children[j].dataset);
+          button_current(article_button);
+          article_list.hidden = false;
+          x_selector.hidden = true;
+        }
+      })(i);
+    };
+  };
 };
 
 //把文章按照笔记本排序
@@ -335,9 +337,11 @@ function get_notebooks(){
     url:'/notebook/get',
     callback:function(res){
       notebooks = JSON.parse(res);
-      fulfill_notebooks();
-      fulfill_articles(notebooks[0]);
-      current_notebook_id = notebooks[0]["id"];
+      if(notebooks.length > 0){
+        fulfill_notebooks();
+        fulfill_articles(notebooks[0]);
+        current_notebook_id = notebooks[0]["id"];
+      }
     },
     data: {}
   });
@@ -345,7 +349,7 @@ function get_notebooks(){
 };
 
 function get_article(notebook_id){
-  url_get = '/article/get';
+  url_get = '/article/get?limit=10000';
   if(notebook_id>0){
     url_get = url_get + '?notebook_id=' +notebook_id;
     current_notebook_id = notebook_id;
@@ -449,12 +453,67 @@ add_button.onclick = function(){
   };
 };
 
+function post_notebook(t,notebook_name){
+  var ajax = new Ajax({
+    method:'post',
+    url:'/notebook/post',
+    callback:function(res){
+      res = JSON.parse(res);
+      console.log(res);
+      t.dataset.id = res["id"];
+      t.dataset.type = "notesbook";
+      t.dataset.name = res["name"];
+      fulfill_articles(res);
+    },
+    data: {
+      "name":notebook_name,
+    }
+  });
+  ajax.send();
+};
+
+
 function new_notebook(){
   var t = document.createElement('dt');
   t.className = "selector-item";
   t.id = "selector-item";
-  t.innerHTML = '<div><input><div class="selector-item-name">'
-                +"name"+'</div>'+'</div>';
+  var t_div = document.createElement("div");
+  var t_input = document.createElement("input");
+  t_input.className = "selector_input";
+
+
+  var t_des_div = document.createElement("div");
+  t_des_div.className = "selector-item-description";
+  t_des_div.hidden = true;
+
+  var selector_item = document.createElement("div");
+  selector_item.className = "selector-item-name";
+  selector_item.hidden = true;
+  t.append(t_div);
+  t_div.append(t_input);
+  t_div.append(selector_item);
+  t_div.append(t_des_div);
+  //t.innerHTML = '<div><input class="selector_input"><div class="selector-item-name">'
+  //              +'</div>'+'</div>';
+
+  //输入框焦点丢失
+  t_input.onblur = function(){
+    t_input.hidden = true;
+    selector_item.hidden = false;
+    selector_item.innerText = t_input.value;
+    notebook_name = t_input.value;
+    post_notebook(t,notebook_name);
+    t_des_div.innerText = '0条笔记';
+    t_des_div.hidden = false;
+  };
+
+  selector_item.onclick = function() {
+      current_notebook_id = t.dataset["id"];
+      fulfill_articles(t.dataset);
+      button_current(article_button);
+      article_list.hidden = false;
+      x_selector.hidden = true;
+    };
   x_selector_list.appendChild(t);
 };
 
