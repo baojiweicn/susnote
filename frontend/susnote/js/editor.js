@@ -175,7 +175,6 @@ function button_current(button){
 //初始化数据
 function initial_data(){
   console.log("Ready!")
-  moke_login();
   get_article();
 };
 
@@ -313,23 +312,6 @@ function set_current_article(article_item){
   current_origin_article = editor.getMarkdown();
   origin_title = editor_title.value;
 };
-
-
-function moke_login(){
-  var ajax = new Ajax({
-    method:'post',
-    url:'/user/login',
-    callback:function(res){
-      console.log(res);
-    },
-    data: {
-      "username":"user1",
-      "password":"123456"
-    }
-  });
-  ajax.send();
-};
-
 
 function get_notebooks(){
   var ajax = new Ajax({

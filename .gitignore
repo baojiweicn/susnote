@@ -7,6 +7,8 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+app/__pycache__/
+env3
 env3/
 env/
 build/

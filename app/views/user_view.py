@@ -86,6 +86,8 @@ async def login(request):
                 request['session']['author_id'] = records[0]['id']
                 request['session']['author_name'] = records[0]['nickname']
                 return json({'success':'success'},status=200)
+        else:
+            return json({'error':'user not register'},status=400)
     return json({'error':'illegal information'},status=400)
 
 @user_bp.route('/logout',methods=['GET'])
