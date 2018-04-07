@@ -58,16 +58,17 @@ async def add_notebooks(request):
     if author_id <0:
         return json({'error':'illegal information'}, status=400)
 
-    sql = """insert into notebook (name,author_id) values ('%s','%s')""" \
+    sql = """insert into notebook (name,author_id) values ('%s','%s') RETURNING id,name""" \
     %(data.get('name'), author_id)
+    print(sql)
     async with request.app.db.acquire() as cur:
         try:
-            await cur.fetch(sql)
+            res = await cur.fetch(sql)
             logger.info(sql)
         except Exception as e:
             logger.error(e)
             return json({'error':'service error'}, status=400)
-    return json({'success':'success'},status=200)
+    return json({'success':'success', 'id':res[0]['id'], 'name':res[0]['name']}, status=200)
 
 @notebook_bp.route('/put',methods=['PUT'])
 async def update_notebook(request):
