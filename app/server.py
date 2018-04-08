@@ -144,7 +144,7 @@ class Client:
         self._client.close()
 
 from sanic import Sanic
-from sanic.response import json, text
+from sanic.response import json, text, redirect
 from config import DEBUG, WORKERS, DB_CONFIG, REDIS_CONFIG, TEMPLATE_PATH, FILE_STATIC_PATH
 from jinja2 import Environment, FileSystemLoader
 import asyncio_redis
@@ -232,7 +232,7 @@ app.blueprint(notebook_bp)
 
 @app.route("/")
 async def test(request):
-    return text('Hello world!')
+    return redirect('/susnote/html/user.html')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=8000, debug=DEBUG)
