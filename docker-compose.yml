@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+    web:
+        build:
+            context: .
+        links:
+            - db
+        volumes:
+            - "${PWD}:/susnote"
+        ports:
+            - "8000:8000"
+        networks:
+            - dev-network
+        environment:
+            dbname: postgres
+            user: postgres
+            host: db
+            port: 5432
+
+        depends_on:
+            - "db"
+            - "redis"
+        command: bash -c "python migrations.py && python server.py"
+
+    db:
+        image: "postgres:9.6"
+        networks:
+            - dev-network
+
+    redis:
+        image: "redis"
+        networks:
+            - dev-network
+networks:
+    dev-network:
+        driver: bridge
