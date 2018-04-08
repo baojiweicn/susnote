@@ -1,6 +1,6 @@
 # Susnote
 <img src="https://raw.githubusercontent.com/baojiweicn/susnote/server/frontend/susnote/images/logo-colorful.png" width="100" height="100" />
-Susnote is a notebook.<br>
+[Susnote](http://susnote.com) is a notebook.<br>
 
 ![image](https://coding.net/u/baojiwei/p/susnote/git/raw/server/snap.gif)
 Susnote is not only a notebook.
