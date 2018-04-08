@@ -1,15 +1,15 @@
 [database]
-host = localhost
-user = None
-password = None
+host = db
+user = postgres
+password = postgres
 port = None
-database = susnote
+database = postgres
 
 [redis]
 open = True
-host = localhost
+host = redis
 port = 6379
 
 [security]
-debug = True
-workers = 2
+debug = False
+workers = 4
