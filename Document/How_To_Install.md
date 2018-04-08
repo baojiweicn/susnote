@@ -23,7 +23,7 @@ After all these work:
 安装完环境之后，需要初始化数据库(postgres):<br>
 [Mac系统](https://www.postgresql.org/download/macosx/) <br>
 [Linux系统](https://www.postgresql.org/download/linux/ubuntu/) <br>
-[Windowsß系统](https://www.postgresql.org/download/macosx/) <br>
+[Windows系统](https://www.postgresql.org/download/macosx/) <br>
 
 安装完成后，进入到postgres-cli:
     CREATE DATABASE susnote;
@@ -36,3 +36,13 @@ After all these work:
 如果需要使用redis作为缓存。请在config文件中将redis的open选项设置为True，反之设置为False.(将使用本地缓存)
 
 ### Install through Docker:
+It's much easier to install through docker. Use command:<br>
+    docker-compose build<br>
+then:<br>
+    docker-compose up<br>
+
+### 通过docker安装
+直接使用命令:<br>
+    docker-compose build<br>
+然后使用命令启动:<br>
+    docker-compose up<br>
