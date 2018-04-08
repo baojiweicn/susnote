@@ -62,6 +62,7 @@ function login(username,password){
       }
       else
       {
+        window.location.href='/susnote/html/editor.html';
         return res;
       };
     },
