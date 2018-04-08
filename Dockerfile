@@ -7,7 +7,3 @@ RUN pip install -i 'http://pypi.douban.com/simple' --trusted-host pypi.douban.co
 WORKDIR /susnote/app
 
 EXPOSE 8000
-
-FROM redis
-COPY redis.conf /usr/local/etc/redis/redis.conf
-CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
