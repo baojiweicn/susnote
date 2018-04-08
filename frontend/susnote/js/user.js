@@ -62,7 +62,7 @@ function login(username,password){
       }
       else
       {
-        window.location.href='/susnote/html/editor.html';
+        window.location.pathname = '/susnote/html/editor.html'
         return res;
       };
     },
@@ -83,7 +83,7 @@ function register(username,password){
       console.log(res);
       if(!res.hasOwnProperty('error') && res.hasOwnProperty('success'))
       {
-        window.location.href='/susnote/html/editor.html'
+        window.location.pathname = '/susnote/html/editor.html'
       }
       else{
         return res;
