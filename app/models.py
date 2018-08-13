@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
+import datetime
+
 from peewee import *
 from playhouse.postgres_ext import *
-import datetime
+
 
 class BaseModel(Model):
 	id = PrimaryKeyField()
